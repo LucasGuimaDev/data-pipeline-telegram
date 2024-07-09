@@ -9,7 +9,7 @@ O projeto a seguir consiste na criação de um pipeline que coleta esses dados a
 
 Chatbot é um robô conversacional que oferece respostas aos usuários e é com ele que faremos as coletas de todas as mensagens.
 
-As mensagens enviadas no grupo e coletadas pelo chatbot são dados transacionais, ou seja, são dados brutos, sem nenhum tipo de tratamento e que muitas vezes cotém informações irrelevantes para determinada análise.
+As mensagens enviadas no grupo e coletadas pelo chatbot são dados transacionais, ou seja, são dados brutos, sem nenhum tipo de tratamento e que muitas vezes contém informações irrelevantes para determinada análise.
 
 Os dados transacionais passarão pelo processo de ETL para então se tornarem dados analíticos. Dados analíticos por sua vez, são dados tratados de uma forma que podem ser utilizados em análises.
 
@@ -21,14 +21,14 @@ Os serviços utilizados nesse pipeline são oferecidos pela [AWS](https://aws.am
 ![fluxograma](https://github.com/LucasGuimaDev/data-pipeline-telegram/blob/main/imagens/fluxograma_data_pipeline.png)
 
 
-O chat bot faz a leitura dos dados transacionais, ou melhor dizendo, as mensagens enviadas pelos usuários no grupo do telegram,  e através do `API Gateway` e do `AWS Lambda` elas são salvas em um bucket no `AWS S3` no formato json
+O chat bot faz a leitura dos dados transacionais, ou melhor dizendo, as mensagens enviadas pelos usuários no grupo do telegram,  e através do `API Gateway` e do `AWS Lambda` elas são salvas em um bucket no `AWS S3` no formato json. Essas informações são tratadas a partir de outra função lambda e novamente salvas em um novo bucket e posteriormente acessadas e visualizadas pelo `AWS Athena`.
 
 ----
 
 ## Bot Telegram
 
 
-Após criar o bot no telegram atravé do `BotFather` ele mostrará o `token` de acesso, caso não tenha anotado, segue passo a passo para buscar esse `token`
+Após criar o bot no telegram através do `BotFather` ele mostrará o `token` de acesso, caso não tenha anotado, segue passo a passo para buscar esse `token`
 
 *Lembre-se, esse `token` é confidencial, portanto,  não o compartilhe*
 
@@ -38,14 +38,14 @@ Para acessar o `token` basta mandar a menssagem `/mybots` para o `BotFather`, se
 
 
 
-O `token` de acesso é um código que aparece logo abaixo do nome do bot na cor laranja
+O `token` de acesso é um código que aparece logo abaixo do nome do bot na cor laranja.
 
 ![screen_shoot_2](https://github.com/LucasGuimaDev/data-pipeline-telegram/blob/main/imagens/print2.png)
 
-*Após adicionar o bot no grupo de coleta de dados, lembre-se de `desabilitar` a adição do bot em grupos*
+*Após adicionar o bot no grupo de coleta de dados, lembre-se de `desabilitar` a adição do bot em grupos.*
 
 -----
-Após coletar os `token` de acesso insira ele na variável "token" usando o método getpass:
+Após coletar o `token` de acesso insira ele na variável "token" usando o método getpass:
 
 *Este método é essencial para se trabalhar com dados confidenciais.*
 
@@ -54,7 +54,7 @@ from getpass import getpass
 
 token = getpass()
 ```
-Passando o `token` de acesso para a variável, passamos o valor para a URL da API e então com a lib `requests` e o acessamos as informações com o método `getMe` como no código abaixo:
+Passando o `token` de acesso para a variável, passamos o valor para a URL da API e então com a lib `requests` acessamos as informações com o método `getMe` como no código abaixo:
 ```python
 import json
 import requests
@@ -81,7 +81,7 @@ o método `getMe` retorna um json com as seguintes informações:
   }
 }
 ```
-Para analisar as mensagens envidas no grupo e captadas pelo bot existe um outro método chamado `getUpdates`
+Para analisar as mensagens enviadas no grupo e captadas pelo bot existe um outro método chamado `getUpdates`.
 
 ```python
 response = requests.get(url=f'{base_url}/getUpdates')
@@ -195,9 +195,9 @@ def lambda_handler(event: dict, context: dict) -> dict:
 
 ## API Gateway
 
-Depois de criar a função lambda é necessário criar uma APi através do `AWS API Gateway` para coletar as mensagens que serão enviadas no grupo automaticamente, conectar a função lambda criada e posteriormente setar um `webhook` para realizar essa coleta. O webhook irá coletar esses dados e então passar eles pela função Lambda que acaba de ser criada.
+Depois de criar a função lambda é necessário criar uma API através do `AWS API Gateway` para coletar as mensagens que serão enviadas no grupo automaticamente, conectar a função lambda criada e posteriormente setar um `webhook` para realizar essa coleta. O webhook irá coletar esses dados e então passar eles pela função Lambda que acaba de ser criada. Após setar o webhook não será mais possível utilizar o método `GetUpdates` usado anteriormente.
 
-O `AWS API Gateway` gera um endereço de API, portanto utilizaremos o getpass para coletar essa informação
+O `AWS API Gateway` gera um endereço de API, portanto utilizaremos o getpass para coletar essa informação.
 
 *O endereço do API gateway é confidencial*
 
@@ -393,7 +393,7 @@ MSCK REPAIR TABLE `telegram_datalake`;
 ```
 É possível automatizar esse processo criando uma função no `AWS Lambda` e posteriormente um evento no `AWS EventBridge`.
 
-*Lembre-se de dar os acessos necessários através do `AWS IAM`, configurar as variáveis de ambiente, adicionar a `Layer` para que a função funcione corretamente e configurar o evento no `AWS EventBridge` ao menos 30 minutos depois do que foi configurado o evento anterios, para que dê tempo o suficiente da função lambda carregar os dados tratado no bucket `-enriched`*.
+*Lembre-se de dar os acessos necessários através do `AWS IAM`, configurar as variáveis de ambiente, adicionar a `Layer` para que a função funcione corretamente e configurar o evento no `AWS EventBridge` ao menos 30 minutos depois do que foi configurado o evento anterior(nesse caso, dever ser configruado para rodar todos os dias às 3h30), para que dê tempo o suficiente da função lambda carregar os dados tratados no bucket `-enriched`*.
 
 ```python
 import os
@@ -481,4 +481,4 @@ GROUP BY
   context_date
 ORDER BY context_date DESC
 ```
-E então podemos realizar o *download* das informações das queries em formato `.csv`
+E então podemos realizar o *download* das informações das queries em formato `.csv`.
